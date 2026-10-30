@@ -1,0 +1,61 @@
+name: APK Ducale Fitness
+
+on:
+  push:
+    paths:
+      - "treino-app/**"
+      - ".github/workflows/ducale-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Gerar index.html
+        run: sh treino-app/build.sh
+
+      # Se existir treino-app/logo.png (ou .jpg), ele vira o ícone do app
+      - name: Ícone a partir do logo
+        run: |
+          LOGO=$(ls treino-app/logo.png treino-app/logo.jpg 2>/dev/null | head -1)
+          if [ -n "$LOGO" ]; then
+            RES=treino-app/android/app/src/main/res
+            for pair in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+              convert "$LOGO" -resize "${pair#*:}x${pair#*:}^" -gravity center -extent "${pair#*:}x${pair#*:}" "$RES/mipmap-${pair%%:*}/ic_launcher.png"
+            done
+          fi
+
+      - name: Compilar APK
+        run: gradle -p treino-app/android assembleRelease --no-daemon
+
+      - name: Renomear APK
+        run: cp treino-app/android/app/build/outputs/apk/release/app-release.apk ducale-fitness.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ducale-fitness-apk
+          path: ducale-fitness.apk
+
+      - name: Publicar na página de Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="apk-${GITHUB_REF_NAME//\//-}"
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" ducale-fitness.apk --target "$GITHUB_SHA" --prerelease \
+            --title "Ducale Fitness (build ${GITHUB_RUN_NUMBER})" \
+            --notes "APK gerado automaticamente a partir do branch ${GITHUB_REF_NAME}. Para instalar, abra o arquivo no celular Android e permita instalar apps desta fonte."

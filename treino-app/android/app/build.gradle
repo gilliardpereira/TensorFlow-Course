@@ -1,0 +1,48 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.ducale.fitness'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.ducale.fitness'
+        minSdk 24
+        targetSdk 34
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as Integer)
+        versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    // Chave fixa para instalar atualizações por cima da versão anterior (APK distribuído fora da Play Store)
+    signingConfigs {
+        shared {
+            storeFile file('ducale.keystore')
+            storePassword 'android'
+            keyAlias 'ducale'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.shared
+        }
+        debug {
+            signingConfig signingConfigs.shared
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Copia o app web (gerado por ../build.sh) para dentro do APK
+tasks.register('copyWebApp', Copy) {
+    from '../../index.html'
+    into 'src/main/assets'
+}
+preBuild.dependsOn copyWebApp

@@ -1,4 +1,4 @@
-<title>Treino do Prédio</title>
+<title>Ducale Fitness</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
@@ -798,7 +798,7 @@ function render(){
   S.view=["hoje","rotina","progresso","bio","perfil"].indexOf(h)>=0?h:"hoje";
   if(!S.profile || S.editProfile) S.view="perfil";
   document.querySelectorAll("#tabs a").forEach(a=>a.classList.toggle("on",a.dataset.v===S.view));
-  const header=`<div class="top"><div class="brand"><span class="eyebrow">Academia do prédio</span><h1>${S.profile&&!S.editProfile?"Olá, "+esc(S.profile.nome.split(" ")[0]):"Treino do Prédio"}</h1></div>
+  const header=`<div class="top"><div class="brand"><span class="eyebrow">Ducale Fitness · Condomínio Ducale</span><h1>${S.profile&&!S.editProfile?"Olá, "+esc(S.profile.nome.split(" ")[0]):"Ducale Fitness"}</h1></div>
     <span class="mode">${store.mode==="cloud"?"Dados salvos na sua conta":"Dados salvos neste aparelho"}</span></div>`;
   const msg=S.msg?`<div class="alert ${S.msg.k||"info"}" role="status"><p>${esc(S.msg.t)}</p></div>`:"";
   const V={hoje:viewHoje,rotina:viewRotina,progresso:viewProgresso,bio:viewBio,perfil:viewPerfil}[S.view];
